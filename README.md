@@ -2,7 +2,7 @@
 IBM Connections Customizer extensions that manage guest options in the user interface
 
 
-##OpenCode4Connections
+## OpenCode4Connections
 
     This project is an OpenCode4Connections project and is available under the Apache License V2.0.  
     All other aspects of the project, including contributions, defect reports, discussions, feature
