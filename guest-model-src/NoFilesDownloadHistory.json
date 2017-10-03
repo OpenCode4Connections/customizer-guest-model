@@ -1,0 +1,22 @@
+{
+  "extensions": [
+    {
+      "path": "global",
+      "application": "NoFileDownloadHistory",
+      "payload": {
+        "include-files": [
+          "commonTools.js",
+          "NoFileDownloadHistory.js"
+        ]
+      },
+      "name": "NoFileDownloadHistory Extension",
+      "type": "com.ibm.customizer.ui"
+    }
+  ],
+  "name": "NoFileDownloadHistory",
+  "description": "Prevents selectively showing who liked or downloaded a given file",
+  "services": [
+    "Customizer"
+  ],
+  "title": "NoFileDownloadHistory App"
+}

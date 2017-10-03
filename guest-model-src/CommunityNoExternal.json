@@ -1,0 +1,25 @@
+{
+  "extensions": [
+    {
+      "path": "communities",
+      "application": "Community No External App",
+      "payload": {
+        "match": {
+          "url": "communities/service/html/communitycreate"
+        },
+        "include-files": [
+          "commonTools.js",
+          "CommunityNoExternal.js"
+        ]
+      },
+      "name": "Community No External",
+      "type": "com.ibm.customizer.ui"
+    }
+  ],
+  "name": "Community No External",
+  "description": "Prevents creating an Activity open to external people",
+  "services": [
+    "Customizer"
+  ],
+  "title": "Community No External"
+}

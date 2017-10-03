@@ -1,0 +1,22 @@
+{
+  "extensions": [
+    {
+      "path": "files",
+      "application": "Files No External App",
+      "payload": {
+        "include-files": [
+          "commonTools.js",
+          "FilesNoExternal.js"
+        ]
+      },
+      "name": "Files No External",
+      "type": "com.ibm.customizer.ui"
+    }
+  ],
+  "name": "Files No External App",
+  "description": "Stefano Files test",
+  "services": [
+    "Customizer"
+  ],
+  "title": "Files No External Title"
+}
