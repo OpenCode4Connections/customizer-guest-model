@@ -2,7 +2,6 @@
   "extensions": [
     {
       "path": "files",
-      "application": "Files No External App",
       "payload": {
         "include-files": [
           "commonTools.js",
@@ -14,7 +13,7 @@
     }
   ],
   "name": "Files No External App",
-  "description": "Stefano Files test",
+  "description": "Remove from list if user has insufficent permission",
   "services": [
     "Customizer"
   ],
