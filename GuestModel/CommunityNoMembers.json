@@ -1,0 +1,22 @@
+{
+  "extensions": [
+    {
+      "path": "communities",
+      "application": "Community No Members",
+      "payload": {
+        "include-files": [
+          "GuestModel/commonTools.js",
+          "GuestModel/CommunityNoMembers.js"
+        ]
+      },
+      "name": "Community No Members",
+      "type": "com.ibm.customizer.ui"
+    }
+  ],
+  "name": "Community No Members",
+  "description": "Prevents adding or inviting guests via Community Membership",
+  "services": [
+    "Customizer"
+  ],
+  "title": "Community No Members Title"
+}
