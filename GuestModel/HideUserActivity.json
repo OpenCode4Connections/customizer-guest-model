@@ -2,21 +2,22 @@
   "extensions": [
     {
       "path": "global",
-      "application": "NoFileDownloadHistory",
+      "application": "HideUserActivity App",
       "payload": {
         "include-files": [
           "GuestModel/commonTools.js",
-          "GuestModel/NoFileDownloadHistory.js"
+          "GuestModel/HideUserActivity.js"
         ]
       },
-      "name": "NoFileDownloadHistory Extension",
+      "name": "HideUserActivity Extension",
+      "description": "Prevents selectively showing who liked or downloaded a given file",
       "type": "com.ibm.customizer.ui"
     }
   ],
-  "name": "NoFileDownloadHistory",
+  "name": "HideUserActivity App",
   "description": "Prevents selectively showing who liked or downloaded a given file",
   "services": [
     "Customizer"
   ],
-  "title": "NoFileDownloadHistory App"
+  "title": "Hide User Activity"
 }

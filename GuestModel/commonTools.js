@@ -13,355 +13,165 @@
  * implied. See the License for the specific language governing 
  * permissions and limitations under the License.
  */
-if (__GuestModel_debug !== undefined) {
-    __GuestModel_myLog('******** commonTools.js already done. SKIPPING *****************');
+if (__cBill_debug !== undefined) {
+    __cBill_logger('******** commonTools.js already done. SKIPPING *****************');
 } else {
     //
-    //  __GuestModel_debug needs to be declard NOW otherwise the following "myLog" statement will no work properly
+    //  __cBill_debug needs to be declard NOW otherwise the following "__cBill_logger" statement will no work properly
     //
-    var __GuestModel_debug = true;
+    var __cBill_debug = true;
     //
-    //  __GuestModel_hideNoDestroy is a configuration that determines if the DOM elements needs to be hidden or destroyed fro the UI
+    //  __cBill_hideNoDestroy is a configuration that determines if the DOM elements needs to be hidden or destroyed fro the UI
     //  It is used to show the possibilities and to provide a late decision point
     //
-    var __GuestModel_hideNoDestroy = false;
+    var __cBill_hideNoDestroy = false;
     //
     //  Starting ....
     //
-    __GuestModel_myLog('******** commonTools.js executed *****************');
+    __cBill_logger('******** commonTools.js executed *****************');
     //
     //  These are global functions and classes
+    //  ======================================
     //
+   //
+    //  Class which defines a function that asynchronously returns an ELEMENT by its ID
+    //  'onluWhenVisible', 'onlyWhenParentVisible' and 'parentToBeVisible' need to be set manaualy onece the instance has been created
     //
-    //  Utiity to validate if the current user is a member of a given community
-    //
-    function __GuestModel_UserAllowed(uuid) {
-        function getConnectionsUser() {
-            //        if (gllConnectionsData && gllConnectionsData.userId) {
-            //            return gllConnectionsData.userId;
-            //        } else {
-                        //
-                        //
-                        //  Getting "thisUser" from the Cookie since "gllConnectionsData" is not available on all pages
-                        //  for instance it is not available on the "meetings" page
-                        //
-                        let theCookiesStr = __GuestModel_myGetCookie('ids');
-                        let theCookies = theCookiesStr.split(":");
-                        return theCookies[0];
-            //      }
-        }
-        //
-        //  Initialization
-        //  ---------------
-        //
-        var thisUser = getConnectionsUser();
-        var cookieName    = "Muse-" + thisUser + "-" + uuid;
-        this.retrieving   = false;
-        this.communityArgs= {
-            url          : "https://apps.ce.collabserv.com/communities/service/json/v1/community/activepersonmembers",
-            handleAs     : "json",
-            preventCache : false,
-            sync         : false,
-            //user:      NO Need since same Domain,
-            //password:  NO Need since same Domain,
-            content      :  {communityUuid: uuid, limit: '500'},
-        }
-        if (__GuestModel_myGetCookie(cookieName) !== "") {
-            //
-            //  a cookie is present. Initialize values with infos coming from that cookie
-            //
-            this.isAllowed    = __GuestModel_myGetCookie(cookieName) == 0 ? false : true;
-            this.retrieved    = true;
-            __GuestModel_myLog('__GuestModel_UserAllowed.init for (' + uuid + ') : cookie exists and has value ' + this.isAllowed);
-        } else {
-            //
-            //  Cookie is not defined 
-            //  this means we need to go and check the current user
-            //
-            this.isAllowed    = false;
-            this.retrieved    = false;
-            __GuestModel_myLog('__GuestModel_UserAllowed.init for (' + uuid + ') : cookie does not exist...');
-        }
-        
-        this.setCommunityId = function(uuid) {
-            this.communityArgs.content.communityUuid = uuid;
-        }
-
-        this.checkUser = function (label, callback) {
-            var n = this;
-            var communityId = this.communityArgs.content.communityUuid;
-            if (!this.retrieved) {
-                //
-                //  Not yet retrieved. Is some script currently retrieving it ?
-                //
-                if (!this.retrieving) {
-                    //
-                    //  No other script is retrieving.
-                    //  So this script can start retrieving it
-                    //  We signal we are going to retrieve it
-                    //
-                    this.retrieving = true;
-                    //
-                    // Now, we issue the SYNCHRONOUS XHR and we retrieve the results
-                    //
-                    __GuestModel_myLog(label + ': going to validate authorization against user ' + thisUser + ' !');
-                    var deferred = dojo.xhrGet(this.communityArgs);
-
-                    deferred.then(
-                        function (data) {
-                            if (data && data.items && (data.items.length > 0)) {
-                                for (var i=0; i < data.items.length; i++) {
-                                    if (data.items[i].directory_uuid === thisUser) {
-                                        n.isAllowed = true;
-                                        __GuestModel_myLog(label + ': Setting user access for user ' + thisUser + ' to : ' + n.isAllowed);
-                                        break;
-                                    }
-                                }
-                            }
-                            if (n.isAllowed) {
-                                __GuestModel_myLog(label + ': user ' + thisUser + 'is member of community ' + communityId);
-                            } else {
-                                __GuestModel_myLog(label + ': user ' + thisUser + 'is NOT member of community ' + communityId);
-                            }
-                            //
-                            //  set the cookie
-                            //
-                            dojo.cookie(cookieName, n.isAllowed ? 1 : 0);
-                            //
-                            //  free the others waiting
-                            //
-                            n.retrieved = true;
-                            n.retrieving = false;
-                            //
-                            //  do the processing
-                            //
-                            callback(n.isAllowed);
-                        },
-                        function (error) {
-                            n.isAllowed = false;
-                            //
-                            //  set the cookie
-                            //
-                            dojo.cookie(cookieName, n.isAllowed ? 1 : 0);
-                            __GuestModel_myLog(label + ': cookie ' + cookieName + ' set to value ' + n.isAllowed);
-                            if (error.status === 403) {
-                                __GuestModel_myLog(label + ': user ' + thisUser + 'is NOT member of community ' + communityId);
-                                //
-                                //  free the others waiting
-                                //
-                                n.retrieved = true;
-                                n.retrieving = false;
-                                //
-                                //  do the processing
-                                //
-                                callback(n.isAllowed);
-                            } else {
-                                alert(label + ".__GuestModel_UserAllowed : An unexpected error occurred in xhr(" + communityId + "): " + error);
-                                //
-                                //  free the others waiting
-                                //
-                                n.retrieved = false;
-                                n.retrieving = false;
-                            }
-                        }
-                    );
-                } else {
-                    //
-                    //  Some other script is retrieving but has not yet finished.
-                    //  We need to wait until that script has finished
-                    //
-                    __GuestModel_myLog(label + '.__GuestModel_UserAllowed : waiting until retrieving becomes FALSE for community ' + communityId + ' ...');
-                    var waitTime = 100;  // 1000=1 second
-                    var maxInter = 50;  // number of intervals before expiring
-                    var waitInter = 0;  // current interval
-                    var intId = setInterval( function(){
-                        __GuestModel_myLog(label + '.__GuestModel_UserAllowed : waiting RETRIEVING for the ' + waitInter + 'th time...');
-                        if (++waitInter < maxInter && n.retrieving) return;
-                        clearInterval(intId);
-                        if (waitInter >= maxInter) {
-                            alert(label + '.__GuestModel_UserAllowed : TIMEOUT EXPIRED waiting for retrieving to become FALSE for community ' + communityId + ' ...');
-                        } else {
-                            __GuestModel_myLog(label + '.__GuestModel_UserAllowed : now we can proceed setting user ' + thisUser + ' access to ' + n.isAllowed);
-                            callback(n.isAllowed);
-                        }
-                    }, waitTime);
-                }
-            } else {
-                //
-                // Some oher script already validated the membership
-                // We reuse the result
-                //
-                __GuestModel_myLog(label + '.__GuestModel_UserAllowed : User ' + thisUser + ' access Already set to : ' + this.isAllowed);
-                callback(this.isAllowed);
-            }
-        }
-    }   
-    //
-    //  Utility to validate if a given user can be shown as the author of a comment/like/download
-    //
-    function __GuestModel_UserDetails() {
-        this.cache        = [];      
-		
-        this.profilesArgs = {
-            url          : "https://apps.ce.collabserv.com/profiles/atom/profile.do",
-            handleAs     : "xml",
-            preventCache : false,
-            sync         : false,
-            //user:      NO Need since same Domain,
-            //password:  NO Need since same Domain,
-            content      :  {userid: null}
-        }
-        
-        var n = this;
-        
-        this.userIsInCache = function(uuid) {
-            for (var i=0; i < this.cache.length; i++) {
-                if (this.cache[i].uuid === uuid) return i;
-            }
-            return -1; 
-        }
-        
-        this.userCanShow = function(uuid) {
-            var j = this.userIsInCache(uuid);
-            if (j >= 0) return this.cache[j].canShow;
-            return false;
-        }
-        
-        this.userHasEmail = function(uuid) {
-            var j = this.userIsInCache(uuid);
-            if (j >= 0) return this.cache[j].email;
-            return null;
-        }
-        
-        this.addUserToCache = function(uuid, email, canShow) {
-            var tmp = {};
-            tmp.uuid = uuid;
-            tmp.email = email;
-            tmp.canShow = canShow;
-            this.cache.push(tmp);
-        }
-        
-        this.hideUser = function (label, uuid, element) {
-            function checkEmailAddress(email) {
-                if ((email === 'john@acme.com') || (email === 'marie@acme.com')){
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-            function hideTheUser(label, email, element) {
-                dojo.setStyle(element, 'display', 'none');
-                __GuestModel_myLog(label + '.__GuestModel_UserDetails: Element corresponding to user ' + email + ' has been hidden');
-            }
-            
-            if (this.userIsInCache(uuid) >= 0) {
-                __GuestModel_myLog(label + ': user ' + this.userHasEmail(uuid) + ' has already been cached !');
-                if (this.userCanShow(uuid)) {
-                    //
-                    //  User can be seen... Nothing to do
-                    //
-                    __GuestModel_myLog(label + '__GuestModel_UserDetails: user ' + this.userHasEmail(uuid) + ' can be shown ! Nothing more to do.');
-                } else {
-                    //
-                    //  User has been already checked and cannot be shown.
-                    //  So we hide it
-                    //
-                    hideTheUser(label, this.userHasEmail(uuid), element);
-                }
-            } else {
-                __GuestModel_myLog(label + '__GuestModel_UserDetails: user ' + uuid + ' has NOT been found in the cache. Going to fetch its profile !');
-                //
-                //  User is NOT in cache. Needs to be retrieved
-                //
-                this.profilesArgs.content.userid = uuid;
-                var deferred = dojo.xhrGet(this.profilesArgs);            
-                deferred.then(
-                    function (data) {
-                        __GuestModel_myLog(label + '__GuestModel_UserDetails: Profile for user ' + uuid + ' has been fetched... processing it...');
-                        try {
-                            var feed = new dojox.atom.io.model.Feed();
-                            feed.buildFromDom(data.documentElement);
-                            if (feed.entries && feed.entries[0] && feed.entries[0].contributors && feed.entries[0].contributors[0]) {
-                                let email = feed.entries[0].contributors[0].email;
-                                if (checkEmailAddress(email)) {
-                                    //
-                                    //  User cannot be shown.
-                                    //  Hiding the element corresponding to the user
-                                    //
-                                    hideTheUser(label, email, element);
-                                    //
-                                    //  Add the user to the cache
-                                    //
-                                    n.addUserToCache(uuid, email, false);
-                                } else {
-                                    //
-                                    //  Add the user to the cache
-                                    //
-                                    n.addUserToCache(uuid, email, true);
-                                    __GuestModel_myLog(label + '__GuestModel_UserDetails: User ' + email + ' can be shown ! Nothing more to do.');
-                                }
-                            } else {
-                                alert(label + "__GuestModel_UserDetails: error in deferred.then : User " + uuid + ' not found !!');
-                            }
-                        } catch(ex) {
-                            alert(label + "__GuestModel_UserDetails: error in deferred.then : " + ex);
-                        }
-                    },
-                    function (error) {
-                        alert(label + "__GuestModel_UserDetails: An unexpected error occurred in xhr(" + uuid + "): " + error);
-                    }
-                );
-            }
-        }
-    }   
-    //
-    //  
-    //
-    function __GuestModel_WaitForById(label) {
+    function __cBill_waitById(label) {
         this.label = '***UNKNOWN***';
+        this.onlyWhenVisible = false;    // When set to TRUE, a positive result is returned only if the widget is ALSO VISIBLE
+        this.onlyWhenParentVisible = false;  // When set to TRUE, a positive result is returned only if the 'parentToBeVisible' is VISIBLE
+        this.parentToBeVisible = ""; // Definition of the parent that needs to be valid for the 'closest' method on a DOM element
+
         if (label) this.label = label;
-        __GuestModel_myLog(this.label + '.__GuestModel_WaitForById : initialising !');
+        __cBill_logger(this.label + '.__cBill_waitById : initialising !');
+        //
+        //  Main function of this class
+        //  When the related DOM element is found, it executes the 'callback' passing, as parameter, the reference to the element that was found
+        //
         this.do = function(callback, elXpath, maxInter, waitTime) {
             var n = this;
-            __GuestModel_myLog(this.label + '.__GuestModel_WaitForById : executing !');
+            __cBill_logger(this.label + '.__cBill_waitById : executing !');
             if(!maxInter) maxInter = 50;  // number of intervals before expiring
             if(!waitTime) waitTime = 100;  // 1000=1 second
             if(!elXpath) return;
 
             var waitInter = 0;  // current interval
             var intId = setInterval( function(){
-                __GuestModel_myLog(n.label + '.__GuestModel_WaitForById.do : waiting ' + elXpath + ' for the ' + waitInter + 'th time...');
+                __cBill_logger(n.label + '.__cBill_waitById.do : waiting ' + elXpath + ' for the ' + waitInter + 'th time...');
+                //
+                //  Perform the query
+                //
                 var theWidget = dojo.byId(elXpath);
+                //
+                //  If results have NOT been found within the allowed range of trials we wait for another timeout to retry
+                //
                 if (++waitInter < maxInter && !theWidget) return;
-                clearInterval(intId);
+                //
+                //  If we arrive here, either we had a timeout or we found something....
+                //
                 if (waitInter >= maxInter) {
-                    console.log(n.label + '.__GuestModel_WaitForById : TIMEOUT EXPIRED for ' + elXpath + ' !');
+                    //
+                    //  Timeout..
+                    //  Stopping the Interval, logging and finishing....
+                    //
+                    clearInterval(intId);
+                    console.log(n.label + '.__cBill_waitById : TIMEOUT EXPIRED for ' + elXpath + ' !');
                 } else {
-                    __GuestModel_myLog(n.label + '.__GuestModel_WaitForById : element ' + elXpath + ' retrieved !');
-                    __GuestModel_myLog(theWidget);
-                    callback(theWidget);
+                    //
+                    //  Apparently we found something
+                    //  Let's check if there are visible elements and, in that case, return them
+                    //
+                    if (n.onlyWhenVisible || n.onlyWhenParentVisible) {
+                        //
+                        //  Now we have to filter ONLY the elemets that are visible
+                        //
+                        __cBill_logger(n.label + '.__cBill_waitById : checking for visibility of candidate....');
+                        let theResult = null;
+                        let newElem = theWidget;
+                        if (n.onlyWhenParentVisible) {
+                            //
+                            //  Convolution for InternetExplorer !!!
+                            //
+                            if ((navigator.appVersion.indexOf("Trident") != -1) || (navigator.appVersion.indexOf("Edge") != -1)) {
+                                __cBill_logger(n.label + '.__cBill_waitById : in InternetExplorer');
+                                newElem = dojo.query(theWidget).closest(n.parentToBeVisible);
+                                newElem = newElem[0];
+                            } else {
+                                __cBill_logger(n.label + '.__cBill_waitById : NOT in InternetExplorer');
+                                newElem = theWidget.closest(n.parentToBeVisible);
+                            }
+                        }
+                        if (newElem) {
+                            //
+                            //  To check the real visibility, we check the offsetHieight property as described in this article
+                            //  https://davidwalsh.name/offsetheight-visibility
+                            //
+                            __cBill_logger(n.label + '.__cBill_waitById : checking for visibility of ' + newElem);
+                            __cBill_logger(n.label + '.__cBill_waitById : visibility is  ' + newElem.offsetHeight);
+                            if (newElem.offsetHeight > 0) theResult = theWidget;
+                        } else {
+                            __cBill_logger(n.label + '.__cBill_waitById : skipping visibility of a NULL element');
+                        }
+                        if (theResult !== null){
+                            //
+                            //  We have found the candidates..
+                            //  Stopping the Interval, logging and issuing the callback....
+                            //
+                            clearInterval(intId);
+                            __cBill_logger(n.label + '.__cBill_waitById : candidates ' + elXpath + ' retrieved !');
+                            //__cBill_logger(theResult);
+                            callback(theResult);
+                        } else {
+                            //
+                            //  No visible candidate found
+                            //  Maybe we need to continue searching, right ? 
+                            //  Thus we do not clear the timer... and we return as if we were still waiting
+                            //
+                            __cBill_logger(n.label + '.__cBill_waitById : NO VISIBLE element ' + elXpath + ' retrieved ! Continuing');
+                            return;
+                        }
+                    } else {
+                        //
+                        //  No need to check visibility. The elements were retrieved
+                        //  Stopping the Interval, logging and issuing the callback....
+                        //
+                        clearInterval(intId);
+                        __cBill_logger(n.label + '.__cBill_waitById : element ' + elXpath + ' retrieved !');
+                        //__cBill_logger(theQuery);
+                        callback(theWidget);
+                    }
                 }
             }, waitTime);
         };
         
     }
-    function __GuestModel_WaitForByQuery(label) {
+    //
+    //  Class which defines a function that asynchronously returns an ARRAY of ELEMENTS resulting from a dojo QUERY
+    //  'onluWhenVisible', 'onlyWhenParentVisible' and 'parentToBeVisible' need to be set manaualy onece the instance has been created
+    //
+    function __cBill_waitByQuery(label) {
         this.label = '***UNKNOWN***';
-        this.onlyWhenVisible = false;
-        this.onlyWhenParentVisible = false;
-        this.parentToBeVisible = "";
+        this.onlyWhenVisible = false;    // When set to TRUE, a positive result is returned only if the widget is ALSO VISIBLE
+        this.onlyWhenParentVisible = false;  // When set to TRUE, a positive result is returned only if the 'parentToBeVisible' is VISIBLE
+        this.parentToBeVisible = ""; // Definition of the parent that needs to be valid for the 'closest' method on a DOM element
+        
         if (label) this.label = label;
-        __GuestModel_myLog(this.label + '.__GuestModel_WaitForByQuery : initialising !');
+        __cBill_logger(this.label + '.__cBill_waitByQuery : initialising !');
+        //
+        //  Main function of this class
+        //  When the related DOM elements are found, it executes the 'callback' passing, as parameter, the array containing the elements that were found
+        //
         this.do = function(callback, elXpath, maxInter, waitTime) {
             var n = this;
-            __GuestModel_myLog(this.label + '.__GuestModel_WaitForByQuery : executing !');
+            __cBill_logger(this.label + '.__cBill_waitByQuery : executing !');
             if(!maxInter) maxInter = 50;  // number of intervals before expiring
             if(!waitTime) waitTime = 100;  // 1000=1 second
             if(!elXpath) return;
 
             var waitInter = 0;  // current interval
             var intId = setInterval( function(){
-                __GuestModel_myLog(n.label + '.__GuestModel_WaitForByQuery.do : waiting ' + elXpath + ' for the ' + waitInter + 'th time...');
+                __cBill_logger(n.label + '.__cBill_waitByQuery.do : waiting ' + elXpath + ' for the ' + waitInter + 'th time...');
                 //
                 //  Perform the query
                 //
@@ -379,7 +189,7 @@ if (__GuestModel_debug !== undefined) {
                     //  Stopping the Interval, logging and finishing....
                     //
                     clearInterval(intId);
-                    console.log(n.label + '.__GuestModel_WaitForByQuery : TIMEOUT EXPIRED for ' + elXpath + ' !');
+                    console.log(n.label + '.__cBill_waitByQuery : TIMEOUT EXPIRED for ' + elXpath + ' !');
                 } else {
                     //
                     //  Apparently we found something
@@ -389,19 +199,33 @@ if (__GuestModel_debug !== undefined) {
                         //
                         //  Now we have to filter ONLY the elemets that are visible
                         //
-                        __GuestModel_myLog(n.label + '.__GuestModel_WaitForByQuery : checking for visibility of ' + theQuery.length + ' candidates....');
+                        __cBill_logger(n.label + '.__cBill_waitByQuery : checking for visibility of ' + theQuery.length + ' candidates....');
                         let theResult = [];
                         theQuery.forEach(function(elem) {
                             let newElem = elem;
                             if (n.onlyWhenParentVisible) {
-                                newElem = elem.closest(n.parentToBeVisible);
+                                //
+                                //  Convolution for InternetExplorer !!!
+                                //
+                                if ((navigator.appVersion.indexOf("Trident") != -1) || (navigator.appVersion.indexOf("Edge") != -1)) {
+                                    __cBill_logger(n.label + '.__cBill_waitByQuery : in InternetExplorer');
+                                    newElem = dojo.query(elem).closest(n.parentToBeVisible);
+                                    newElem = newElem[0];
+                                } else {
+                                    __cBill_logger(n.label + '.__cBill_waitByQuery : NOT in InternetExplorer');
+                                    newElem = elem.closest(n.parentToBeVisible);
+                                }
                             }
                             if (newElem) {
-                                __GuestModel_myLog(n.label + '.__GuestModel_WaitForByQuery : checking for visibility of ' + newElem);
-                                __GuestModel_myLog(n.label + '.__GuestModel_WaitForByQuery : visibility is  ' + newElem.offsetHeight);
+                                //
+                                //  To check the real visibility, we check the offsetHieight property as described in this article
+                                //  https://davidwalsh.name/offsetheight-visibility
+                                //
+                                __cBill_logger(n.label + '.__cBill_waitByQuery : checking for visibility of ' + newElem);
+                                __cBill_logger(n.label + '.__cBill_waitByQuery : visibility is  ' + newElem.offsetHeight);
                                 if (newElem.offsetHeight > 0) theResult.push(elem);
                             } else {
-                                __GuestModel_myLog(n.label + '.__GuestModel_WaitForByQuery : skipping visibility of a NULL element');
+                                __cBill_logger(n.label + '.__cBill_waitByQuery : skipping visibility of a NULL element');
                             }
                         });
                         if (theResult.length > 0){
@@ -410,84 +234,137 @@ if (__GuestModel_debug !== undefined) {
                             //  Stopping the Interval, logging and issuing the callback....
                             //
                             clearInterval(intId);
-                            __GuestModel_myLog(n.label + '.__GuestModel_WaitForByQuery : candidates ' + elXpath + ' retrieved !');
-                            __GuestModel_myLog(theResult);
+                            __cBill_logger(n.label + '.__cBill_waitByQuery : candidates ' + elXpath + ' retrieved !');
+                            //__cBill_logger(theResult);
                             callback(theResult);
                         } else {
                             //
+                            //  No visible candidate found
                             //  Maybe we need to continue searching, right ? 
+                            //  Thus we do not clear the timer... and we return as if we were still waiting
                             //
-                            __GuestModel_myLog(n.label + '.__GuestModel_WaitForByQuery : NO VISIBLE element ' + elXpath + ' retrieved ! Continuing');
+                            __cBill_logger(n.label + '.__cBill_waitByQuery : NO VISIBLE element ' + elXpath + ' retrieved ! Continuing');
                             return;
                         }
                     } else {
                         //
-                        //  We have found the candidates..
+                        //  No need to check visibility. The elements were retrieved
                         //  Stopping the Interval, logging and issuing the callback....
                         //
                         clearInterval(intId);
-                        __GuestModel_myLog(n.label + '.__GuestModel_WaitForByQuery : element ' + elXpath + ' retrieved !');
-                        __GuestModel_myLog(theQuery);
+                        __cBill_logger(n.label + '.__cBill_waitByQuery : element ' + elXpath + ' retrieved !');
+                        //__cBill_logger(theQuery);
                         callback(theQuery);
                     }
                 }
             }, waitTime);
         };
     }
-    function __GuestModel_WaitForDojo(label) {
+    //
+    //  Class which defines a function that asynchronously returns when DOJO has been loaded on the page (checking the Dojo version also)
+    //
+    function __cBill_waitForDojo(label) {
         this.label = '***UNKNOWN***';
         if (label) this.label = label;
-        __GuestModel_myLog(this.label + '.__GuestModel_WaitForDojo : initialising !');
+        __cBill_logger(this.label + '.__cBill_waitForDojo : initialising !');
+        //
+        //  Main function of this class
+        //  When DOJO is loaded on the page, it executes the 'callback' 
+        //
         this.do = function(callback, maxInter, waitTime) {
             var n = this;
-            __GuestModel_myLog(this.label + '.__GuestModel_WaitForDojo.do : executing !');
+            __cBill_logger(this.label + '.__cBill_waitForDojo.do : executing !');
             if(!maxInter) maxInter = 50;  // number of intervals before expiring
             if(!waitTime) waitTime = 100;  // 1000=1 second
 
             var waitInter = 0;  // current interval
             var intId = setInterval(function() {
-                __GuestModel_myLog(n.label + '.__GuestModel_WaitForDojo.do : waiting for the ' + waitInter + 'th time...');
+                __cBill_logger(n.label + '.__cBill_waitForDojo.do : waiting for the ' + waitInter + 'th time...');
                 if ((++waitInter < maxInter) && (typeof dojo === "undefined")) return;
                 clearInterval(intId);
                 if (waitInter >= maxInter) {
-                    alert(n.label + '.__GuestModel_WaitForDojo.do : TIMEOUT EXPIRED !');
+                    if (document.body.classList.contains('lotusError')) {
+                        //
+                        //  If we are on an error page, do not display the alert but simply log the information
+                        //
+                        __cBill_logger(n.label + '.commonTools.WaitForDojo.do : This is normal : TIMEOUT Expired on Error page !');
+                    } else {
+                        alert(n.label + '.__cBill_waitForDojo.do : TIMEOUT EXPIRED !');
+                    }
+                    return;
                 } else {
-                    __GuestModel_myLog(n.label + '.__GuestModel_WaitForDojo.do : DOJO is defined !');
-                    __GuestModel_myLog(n.label + '.__GuestModel_WaitForDojo.do : Issuing Dojo/DomReady!... ');
-                    dojo.require("dojo.cookie");
-                    require(["dojo/domReady!"], callback());
+                    __cBill_logger(n.label + '.__cBill_waitForDojo.do : DOJO is defined !');
+                    //
+                    //  Check the Dojo version (this is in order to keep in cosideration iFrames)
+                    //
+                    if (dojo.version.major >= 1 && dojo.version.minor >= 10) {
+                        __cBill_logger(n.label + '.__cBill_waitForDojo.do : Issuing Dojo/DomReady!... ');
+                        dojo.require("dojo.cookie");
+                        require(["dojo/domReady!"], callback());
+                    } else {
+                        alert(n.label + '.__cBill_waitForDojo.do : BAD DOJO version !');
+                    }
                 }
             }, waitTime);
         };
     }
-    function __GuestModel_unCheckBox(theWidget) {
+    function __cBill_uncheckBox(theWidget) {
         //
         //  Makes sure the checkBox is really UNCHECKED by dispatching all the related events
         //
         if (dojo.getAttr(theWidget, "checked")) {
-            __GuestModel_myLog('__GuestModel_unCheckBox : changing checkbox to UNCHECKED...');
+            __cBill_logger('__cBill_uncheckBox : changing checkbox to UNCHECKED...');
             let ownerDoc = theWidget.ownerDocument;
             let myEvent = ownerDoc.createEvent('MouseEvents');
             myEvent.initEvent('click', true, true);
             myEvent.synthetic = true;
             theWidget.dispatchEvent(myEvent, true);
-            dojo.setAttr(theWidget, "value", false);
-            dojo.setAttr(theWidget, "checked", false);
-            dojo.removeAttr(theWidget, "disabled");
+            __cBill_logger('__cBill_uncheckBox : event dispatched to uncheck...');
+            //
+            //  The following statements are UNUSEFUL and even create side-effects.
+            //  DO NOT USE THEM
+            //
+            //dojo.setAttr(theWidget, "value", false);
+            //dojo.setAttr(theWidget, "checked", false);
+            //dojo.removeAttr(theWidget, "disabled");
         } else {
-            __GuestModel_myLog('__GuestModel_unCheckBox : checkbox already UNCHECKED. Nothing to do...');
+            __cBill_logger('__cBill_uncheckBox : checkbox already UNCHECKED. Nothing to do...');
+        }
+    }
+    function __cBill_uncheckBox2(theWidget) {
+        //
+        //  Makes sure the checkBox is really UNCHECKED by dispatching all the related events
+        //  I think that CHROME and IE11 behave differently when trying to change the checkbox of an
+        //  element that is not visible
+        //
+        if (dojo.getAttr(theWidget, "checked")) {
+            __cBill_logger('__cBill_uncheckBox2 : changing checkbox to UNCHECKED...');
+            let ownerDoc = theWidget.ownerDocument;
+            let myEvent = ownerDoc.createEvent('MouseEvents');
+            myEvent.initEvent('click', true, true);
+            myEvent.synthetic = true;
+            theWidget.dispatchEvent(myEvent, true);
+            __cBill_logger('__cBill_uncheckBox2 : event dispatched to uncheck...');
+            if (dojo.isChrome || (navigator.appVersion.indexOf("Trident")!= -1)) {
+                dojo.setAttr(theWidget, "value", false);
+                dojo.setAttr(theWidget, "checked", false);
+                dojo.removeAttr(theWidget, "disabled");
+                __cBill_logger('__cBill_uncheckBox2 : supplemental code for IE or Chrome executed...');
+            }
+        } else {
+            __cBill_logger('__cBill_uncheckBox2 : checkbox already UNCHECKED. Nothing to do...');
         }
     }
     //
     //
     //
-    function __GuestModel_myAlert(theString) {
-        if (__GuestModel_debug) alert(theString);
+    function __cBill_alert(theString) {
+        if (__cBill_debug) alert(theString);
     }
-    function __GuestModel_myLog(theString) {
-        if (__GuestModel_debug) console.log(theString);
+    function __cBill_logger(theString) {
+        if (__cBill_debug) console.log(theString);
     }
-    function __GuestModel_myGetCookie(cname) {
+    function __cBill_getCookie(cname) {
         var name = cname + "=";
         var ca = document.cookie.split(';');
         for(var i = 0; i < ca.length; i++) {
@@ -504,12 +381,8 @@ if (__GuestModel_debug !== undefined) {
 
     //
     //  These are global variables reused throughout the scripts
-    //
-    var __GuestModel_firstACL = new __GuestModel_UserAllowed('7dd029ee-44d1-4fce-82df-c3e74d922446');
-    var __GuestModel_secondACL = new __GuestModel_UserAllowed('b348aa12-3eea-49c0-a743-eb2ca7bb72e7');
-    
-    var __GuestModel_blackList = new __GuestModel_UserDetails();
-    
-    
-    dojo.cookie('stproxy.dock.notremembered', 'no-auto-connect')
+    //  =========================================================
+
+    //  This variable holds the URL of the Connections instance
+    var __cBill_connectionsServer = 'https://apps.ce.collabserv.com';
 }

@@ -1,0 +1,23 @@
+{
+    "extensions": [
+      {
+        "path": "global",
+        "application": "Sametime no AutoLogin App",
+        "payload": {
+          "include-files": [
+            "sika/commonTools.js",
+            "sika/SametimeNoAuto.js"
+          ]
+        },
+        "name": "SametimeNoAutoLogin Extension",
+        "description": "Modifies the behavior of the Sametime AutoLogin",
+        "type": "com.ibm.customizer.ui"
+      }
+    ],
+    "name": "Sametime No AutoLogin App",
+    "description": "Modifies the behavior of the Sametime AutoLogin",
+    "services": [
+      "Customizer"
+    ],
+    "title": "Sametime No AutoLogin"
+  }

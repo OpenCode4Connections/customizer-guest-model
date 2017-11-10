@@ -1,0 +1,82 @@
+{
+    "extensions": [{
+            "path": "activities",
+            "application": "Guest Model Package App",
+            "payload": {
+                "include-files": [
+                    "GuestModel/commonTools.js",
+                    "GuestModel/GuestModel_common.js",
+                    "GuestModel/ActivityNoExternal.js"
+                ]
+            },
+            "name": "Activity No External Extension",
+            "description": "Prevents selected users from creating Activities open to external people",
+            "type": "com.ibm.customizer.ui"
+        },
+        {
+            "path": "global",
+            "application": "Guest Model Package App",
+            "payload": {
+                "include-files": [
+                    "GuestModel/commonTools.js",
+                    "GuestModel/GuestModel_common.js",
+                    "GuestModel/AddInviteGuest.js"
+                ]
+            },
+            "name": "Add Invite Guest Extension",
+            "description": "PAdds te <Invite Guest> menu item for selected users",
+            "type": "com.ibm.customizer.ui"
+        },
+        {
+            "path": "communities",
+            "application": "Guest Model Package App",
+            "payload": {
+                "match": {
+                    "url": "communities/service/html/communitycreate"
+                },
+                "include-files": [
+                    "GuestModel/commonTools.js",
+                    "GuestModel/GuestModel_common.js",
+                    "GuestModel/CommunityNoExternal.js"
+                ]
+            },
+            "name": "Community No External Extension",
+            "description": "Prevents selected users from creating Communities open to external people",
+            "type": "com.ibm.customizer.ui"
+        },
+        {
+            "path": "communities",
+            "application": "Guest Model Package App",
+            "payload": {
+              "include-files": [
+                "GuestModel/commonTools.js",
+                "GuestModel/GuestModel_common.js",
+                "GuestModel/CommunityNoMembers.js"
+              ]
+            },
+            "name": "Community No Members",
+            "description": "Prevents selected users from adding External Members to an existing Community",
+            "type": "com.ibm.customizer.ui"
+          },
+          {
+            "path": "files",
+            "application": "Guest Model Package App",
+            "payload": {
+              "include-files": [
+                "GuestModel/commonTools.js",
+                "GuestModel/GuestModel_common.js",
+                "GuestModel/FilesNoExternal.js"
+              ]
+            },
+            "name": "Files No External",
+            "description": "Prevents selected users from creating files or folders open to external people",
+            "type": "com.ibm.customizer.ui"
+          }
+                ],
+    "name": "Guest Model Package App",
+    "description": "Full Implementation of the Guest Model package",
+    "services": [
+        "Customizer"
+    ],
+    "title": "Guest Model Package"
+}

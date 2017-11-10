@@ -13,7 +13,7 @@
  * implied. See the License for the specific language governing 
  * permissions and limitations under the License.
  */
- 
+// 
 //  RegExp for the "CommunityCreate" page
 //
 var commExp = new RegExp('/communities/service/html/communitycreate');
@@ -21,66 +21,70 @@ if (commExp.test(document.location.pathname)) {
     //
     //  We are actually creating a new Community !!
     //
-    var dojoCommunityNoExternal = new __GuestModel_WaitForDojo('CommunityNoExternal');
+    var dojoCommunityNoExternal = new __cBill_waitForDojo('CommunityNoExternal');
     dojoCommunityNoExternal.do(function () {
-        __GuestModel_myLog('CommunityNoExternal : Dojo is defined !');
         try {
-            var removeAccess = function (externalCheckBox, externalLabel) {
+            __cBill_logger('CommunityNoExternal : Dojo is defined !');
+            let removeAccess = function (externalCheckBox, externalLabel, isAllowed) {
                 //
-                //  Making the checkbox UNCHECKED and INVISIBLE (so by default the community will not be open to outside
-                //  and the user cannot modify this behavior)
+                //  Making the checkbox UNCHECKED.
+                //  This modifies the default and is valid for ALL THE USERS
+                //  
+                __cBill_logger('CommunityNoExternal: changing Checkbox default to UNSET...');
+                __cBill_uncheckBox(externalCheckBox);
                 //
-                __GuestModel_unCheckBox(externalCheckBox);
-                if (__GuestModel_hideNoDestroy) {
-                    dojo.replaceClass(externalCheckBox, 'lotusHidden');
+                //  Now, make the Checkbox INVISIBLE for the users who are not authorized
+                //
+                if (!isAllowed) {
                     //
-                    //  Changing the label associated with the Checkbox to show the user that this action is forbidden
+                    //  Current user is not a member of the Membership Community
+                    //  Thus, the user cannot create an External community
                     //
-                    dojo.setAttr(externalLabel, 'innerHTML', 'You do not have the rights to create a community open to External people');
-                    dojo.setStyle(externalLabel, 'color', 'red');
-                    dojo.setStyle(externalLabel, 'font-weight', 'bold');
+                    if (__cBill_hideNoDestroy) {
+                        dojo.replaceClass(externalCheckBox, 'lotusHidden');
+                        //
+                        //  Changing the label associated with the Checkbox to show the user that this action is forbidden
+                        //
+                        dojo.setAttr(externalLabel, 'innerHTML', 'You do not have the rights to create a community open to External people');
+                        dojo.setStyle(externalLabel, 'color', 'red');
+                        dojo.setStyle(externalLabel, 'font-weight', 'bold');
+                    } else {
+                        //
+                        //  IN PRODUCTION, all the row should be simply made invisible also
+                        //
+                        dojo.addClass(externalLabel.parentNode, 'lotusHidden');
+                    }
                 } else {
-                    //
-                    //  IN PRODUCTION, all the row should be simply made invisible also
-                    //
-                    dojo.addClass(externalLabel.parentNode, 'lotusHidden');
+                    __cBill_logger('CommunityNoExternal: user is Allowed to access: nothing to do...');
                 }
             };
 
             //
             // Start of Processing
             //
-            __GuestModel_myLog('CommunityNoExternal: start');
+            __cBill_logger('CommunityNoExternal: start');
             __GuestModel_firstACL.checkUser('CommunityNoExternal', function (isAllowed) {
-                if (!isAllowed) {
-                    //
-                    //  Current user is not a member of the Membership Community
-                    //  Thus, the user cannot create an extenral community
-                    //
-                    let waitForById = new __GuestModel_WaitForById('CommunityNoExternal');
-                    waitForById.do(
-                        function (externalCheckBox) {
-                            try {
-                                var externalLabel = dojo.byId('allowExternalLabel');
-                                if ((externalCheckBox !== undefined) && (externalLabel !== undefined)) {
-                                    removeAccess(externalCheckBox, externalLabel);
-                                    __GuestModel_myLog('CommunityNoExternal: access removed to user !');
-                                } else {
-                                    alert('CommunityNoExternal: not community create page');
-                                }
-                            } catch (ex) {
-                                alert("CommunityNoExternal: comm nav title mover error: COMMON: " + ex);
+                let waitForCheckbox = new __cBill_waitById('CommunityNoExternal');
+                waitForCheckbox.do(
+                    function (externalCheckBox) {
+                        try {
+                            var externalLabel = dojo.byId('allowExternalLabel');
+                            if ((externalCheckBox !== undefined) && (externalLabel !== undefined)) {
+                                removeAccess(externalCheckBox, externalLabel, isAllowed);
+                                __cBill_logger('CommunityNoExternal: access removed to user !');
+                            } else {
+                                alert('CommunityNoExternal: not community create page');
                             }
-                        }, "allowExternal");
-                } else {
-                    __GuestModel_myLog('CommunityNoExternal: user is Allowed to access: nothing to do...');
-                }
-                __GuestModel_myLog('CommunityNoexternal: finish');
+                        } catch (ex) {
+                            alert("CommunityNoExternal: comm nav title mover error: COMMON: " + ex);
+                        }
+                    }, "allowExternal");
+                __cBill_logger('CommunityNoexternal: finish');
             });
         } catch (ex) {
             alert("CommunityNoExternal error: MAIN: " + ex);
         }
     });
 } else {
-    __GuestModel_myLog('CommunityNoExternal : NOTHING TO DO for ' + document.location + ' !');
+    __cBill_logger('CommunityNoExternal : NOTHING TO DO for ' + document.location + ' !');
 }

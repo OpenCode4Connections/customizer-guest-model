@@ -13,13 +13,13 @@
  * implied. See the License for the specific language governing 
  * permissions and limitations under the License.
  */
-var dojoNoGuestUser = new __GuestModel_WaitForDojo('NoGuestUser');
+var dojoNoGuestUser = new __cBill_waitForDojo('NoGuestUser');
 //
 //  Since this script is applied to GLOBAL, there are some pages (mycontacts, mynetwork) which load Dojo very lazily.
 //  So we need to wait until Dojo is fully loaded before testing and using it
 //
 dojoNoGuestUser.do(function () {
-    __GuestModel_myLog('NoGuestUser : Dojo is defined !');
+    __cBill_logger('NoGuestUser : Dojo is defined !');
     //
     //  Check the Dojo version (this is in order to keep in cosideration iFrames)
     //
@@ -28,7 +28,7 @@ dojoNoGuestUser.do(function () {
             var removeAccess = function (bssUsersMenuWidget) {
                 var widgets = dojo.query("a.invite", bssUsersMenuWidget);
                 if (widgets[0]) {
-                    if (__GuestModel_hideNoDestroy) {
+                    if (__cBill_hideNoDestroy) {
                         //
                         //  Create replacing text
                         //
@@ -54,27 +54,27 @@ dojoNoGuestUser.do(function () {
             //
             // Start of Processing
             //
-            __GuestModel_myLog('NoGuestUser : start');
+            __cBill_logger('NoGuestUser : start');
             __GuestModel_firstACL.checkUser('NoGuestUser', function (isAllowed) {
                 if (!isAllowed) {
                     //
                     //  Current user is not a member of the Membership Community
                     //  Thus, the user cannot create an extenral community
                     //
-                    let waitForById = new __GuestModel_WaitForById('NoGuestUser');
+                    let waitForById = new __cBill_waitById('NoGuestUser');
                     waitForById.do(
                         function (bssUsersMenuWidget) {
                             try {
                                 removeAccess(bssUsersMenuWidget);
-                                __GuestModel_myLog('NoGuestUser: access removed to user !');
+                                __cBill_logger('NoGuestUser: access removed to user !');
                             } catch (ex) {
                                 alert("NoGuestUser: error removing access: " + ex);
                             }
                         }, "bss-usersMenu");
                 } else {
-                    __GuestModel_myLog('NoGuestUser: user is Allowed to access: nothing to do...');
+                    __cBill_logger('NoGuestUser: user is Allowed to access: nothing to do...');
                 }
-                __GuestModel_myLog('NoGuestUser: finish');
+                __cBill_logger('NoGuestUser: finish');
             });
         } catch (ex) {
             alert("NoGuestUser error: MAIN: " + ex);

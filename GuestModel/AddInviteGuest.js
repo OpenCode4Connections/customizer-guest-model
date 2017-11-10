@@ -13,67 +13,43 @@
  * implied. See the License for the specific language governing 
  * permissions and limitations under the License.
  */
-var dojoAddInviteGuest = new __GuestModel_WaitForDojo('AddInviteGuest');
-//
-//  Since this script is applied to GLOBAL, there are some pages (mycontacts, mynetwork) which load Dojo very lazily.
-//  So we need to wait until Dojo is fully loaded before testing and using it
-//
-dojoAddInviteGuest.do(function () {
-    __GuestModel_myLog('AddInviteGuest : Dojo is defined !');
+if ((document.location.pathname === '/homepage/orgadmin/orgadmin.jsp') || (document.location.pathname === '/news/web/jsp/notificationCenter/ncFlyout.jsp')) {
     //
-    //  Check the Dojo version (this is in order to keep in cosideration iFrames)
+    //  We need to trap page URLs which do not load DOJO
     //
-    if (dojo.version.major >= 1 && dojo.version.minor >= 10) {
+    __cBill_logger('AddInviteGuest : This page is not supported !!');
+} else {
+    var dojoAddInviteGuest = new __cBill_waitForDojo('AddInviteGuest');
+    //
+    //  Since this script is applied to GLOBAL, there are some pages (mycontacts, mynetwork) which load Dojo very lazily.
+    //  So we need to wait until Dojo is fully loaded before testing and using it
+    //
+    dojoAddInviteGuest.do(function () {
         try {
+            __cBill_logger('AddInviteGuest : Dojo is defined !');
             var giveAccess = function (bssUsersMenuWidget) {
                 //
                 //  Find the LOGOUT <li> element
                 //
                 let logoutWidget = dojo.query("li.logout", bssUsersMenuWidget);
                 if (logoutWidget[0]) {
-                    __GuestModel_myLog('AddInviteGuest.giveAccess : LOGOUT item found...');
+                    __cBill_logger('AddInviteGuest.giveAccess : LOGOUT item found...');
                     //
                     //  create the new <LI> element
                     //
-                    let inviteLI = dojo.create('li', {class : 'invite'})
-                    __GuestModel_myLog('AddInviteGuest.giveAccess : LI element created...');
+                    let inviteLI = dojo.create('li', { class: 'invite' })
+                    __cBill_logger('AddInviteGuest.giveAccess : LI element created...');
                     //
                     //  Create the new <A> element
-					//  Depending on your region, you may need to use apps.ce or apps.ap instead of apps.na URL below
+                    //  Depending on your region, you may need to use apps.ce or apps.ap instead of apps.na URL below
                     //
-                    let inviteA = dojo.create('a', {innerHTML: 'Invite GUEST', class : 'invite', target: '_parent', role: 'menuitem', tabindex: '0', href: '/manage/subscribers/showInviteGuestDialog/input'}, inviteLI);
-                    __GuestModel_myLog('AddInviteGuest.giveAccess : A element created...');
+                    let inviteA = dojo.create('a', { innerHTML: 'Invite GUEST', class: 'invite', target: '_parent', role: 'menuitem', tabindex: '0', href: '/manage/subscribers/showInviteGuestDialog/input' }, inviteLI);
+                    __cBill_logger('AddInviteGuest.giveAccess : A element created...');
                     //
                     //  Now place the LI in the menu
                     //
                     dojo.place(inviteLI, logoutWidget[0], 'before');
-                    //dojo.place(inviteLI, logoutWidget[0].parentNode, 'first');
-
-
-                    //let pippo = dojo.clone(logoutWidget[0]);
-                    //dojo.setAttr(pippo, 'href', 'https://apps.na.collabserv.com/manage/subscribers/showInviteGuestDialog/input');
-                    __GuestModel_myLog('AddInviteGuest.giveAccess : LI element placed in menu...');
-                    console.log(inviteLI);
-                    /*
-                    if (__GuestModel_hideNoDestroy) {
-                        //
-                        //  Create replacing text
-                        //
-                        var newLabel = dojo.create('label');
-                        dojo.setAttr(newLabel, 'innerHTML', 'NO Right to INVITE');
-                        dojo.setStyle(newLabel, 'color', 'red');
-                        dojo.setStyle(newLabel, 'font-weight', 'bold');
-                        dojo.setStyle(newLabel, 'padding-left', '0.75em');
-                        dojo.setStyle(newLabel, 'padding-right', '0.75em');
-                        dojo.place(newLabel, widgets[0].parentNode, "first");
-                        dojo.setStyle(widgets[0], 'display', 'none');
-                    } else {
-                        //
-                        //  physically remove the element
-                        //
-                        dojo.destroy(widgets[0].parentNode);
-                    }
-                    */
+                    __cBill_logger('AddInviteGuest.giveAccess : LI element placed in menu...');
                 } else {
                     alert('AddInviteGuest.giveAccess : strange situation. LOGOUT element not found !!!');
                 }
@@ -82,32 +58,30 @@ dojoAddInviteGuest.do(function () {
             //
             // Start of Processing
             //
-            __GuestModel_myLog('AddInviteGuest : start');
+            __cBill_logger('AddInviteGuest : start');
             __GuestModel_firstACL.checkUser('AddInviteGuest', function (isAllowed) {
                 if (isAllowed) {
                     //
                     //  Current user is a member of the Membership Community
                     //  Thus, the user can invite external Guests
                     //
-                    let waitForById = new __GuestModel_WaitForById('AddInviteGuest');
+                    let waitForById = new __cBill_waitById('AddInviteGuest');
                     waitForById.do(
                         function (bssUsersMenuWidget) {
                             try {
                                 giveAccess(bssUsersMenuWidget);
-                                __GuestModel_myLog('AddInviteGuest: access GRANTED to user !');
+                                __cBill_logger('AddInviteGuest: access GRANTED to user !');
                             } catch (ex) {
                                 alert("AddInviteGuest: error granting access: " + ex);
                             }
                         }, "bss-usersMenu");
                 } else {
-                    __GuestModel_myLog('AddInviteGuest: user is NOT Allowed to access: nothing to do...');
+                    __cBill_logger('AddInviteGuest: user is NOT Allowed to access: nothing to do...');
                 }
-                __GuestModel_myLog('AddInviteGuest: finish');
+                __cBill_logger('AddInviteGuest: finish');
             });
         } catch (ex) {
             alert("AddInviteGuest error: MAIN: " + ex);
-        }
-    } else {
-        alert('AddInviteGuest: BAD DOJO version !');
-    }
-});
+            }
+    });
+}
