@@ -49,10 +49,10 @@ if the user created a CONTACT for a person that is not yet a registered user or 
 
 
 ### *Installation*
-You can install these extensions directly by adding the [GuestModel_common.json](./GuestModel_common.json) JSON file into the Organization Extensions of your IBM Connections Cloud organization.
+You can install these extensions directly by adding the [GuestModel_common.json](GuestModelGuestModel_common.json) JSON file into the Organization Extensions of your IBM Connections Cloud organization.
 
 ### *Customization*
-You may want to customize the "Access Control Lists" which define the rights previously described. In order to do this, you need to modify the following lines at the bottom of the [GuestModel_Common.js](./GuestModel_common.js) file:
+You may want to customize the "Access Control Lists" which define the rights previously described. In order to do this, you need to modify the following lines at the bottom of the [GuestModel_Common.js](GuestModelGuestModel_common.js) file:
 ![GuestModel_common](docs/GuestModel_common.gif)
 
 - Simply change the UUID of the two communities referenced by the global variables shown in the picture above to point to two Communities you have previously created in your organization.
@@ -60,7 +60,7 @@ You may want to customize the "Access Control Lists" which define the rights pre
     1. __GuestModel_firstACL represents the ACL allowing people to invite external users and to share content with external users
     2. __GuestModel_secondACL represents the ACL allowing people to add/invite members to an already created Restricted Community.
 
-You may also want to customize the Link to the "service desk" page which manages invitations for external people who are referenced in the personal Contacts. In that case you need to modify the following value in the [GuestModel_Common.js](./GuestModel_common.js) file:
+You may also want to customize the Link to the "service desk" page which manages invitations for external people who are referenced in the personal Contacts. In that case you need to modify the following value in the [GuestModel_Common.js](GuestModelGuestModel_common.js) file:
 ![GuestModel_common2](docs/GuestModel_common2.gif)
 
 ### *Technical impact*
@@ -87,10 +87,10 @@ In the following picture, both Franck Adams and Heather Reeds viewed the documen
 ![HideUserActivity](docs/HideUserActivity.gif)
  
 ### *Installation*
-You can install these extensions directly by adding the [HideUserActivity.json](./HideUserActivity.json) JSON file into the Organization Extensions of your IBM Connections Cloud organization.
+You can install these extensions directly by adding the [HideUserActivity.json](GuestModelHideUserActivity.json) JSON file into the Organization Extensions of your IBM Connections Cloud organization.
 
 ### *Customization*
-You may want to customize the criteria used by the script to select the people to hide, you need to modify the following function in the [HideUserActivity.js](./HideUserActivity.js) script:
+You may want to customize the criteria used by the script to select the people to hide, you need to modify the following function in the [HideUserActivity.js](GuestModelHideUserActivity.js) script:
 ![HideUserActivity2](docs/HideUserActivity2.gif)
 In the example, we want to hide the View/Download actions performed by *fadams@spogliani.ibmcollab.com* and *hreeds@spogliani.ibmcollab.com*. 
 You may want to use a more sophisticated algorithm, involving the use of regular expressions for instance.
@@ -120,7 +120,7 @@ The way in which the script works is the following:
 
  
 ### *Installation*
-You can install these extensions directly by adding the [SametimeNoAuto.json](./SametimeNoAuto.json) JSON file into the Organization Extensions of your IBM Connections Cloud organization.
+You can install these extensions directly by adding the [SametimeNoAuto.json](GuestModelSametimeNoAuto.json) JSON file into the Organization Extensions of your IBM Connections Cloud organization.
 
 ### *Customization*
 No customization options for this script
